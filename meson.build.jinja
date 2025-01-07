@@ -1,0 +1,16 @@
+project(
+  '{{ project_name }}',
+  'cpp',
+  version: '{{ version }}',
+  default_options: ['warning_level=3', 'cpp_std=gnu++26'],
+)
+
+incd = include_directories('include')
+src = files('src/main.cpp')
+
+exe = executable(
+  '{{ project_name }}',
+  src,
+  include_directories: incd,
+  install: true,
+)
