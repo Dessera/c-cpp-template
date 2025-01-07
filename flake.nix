@@ -27,7 +27,7 @@
             ...
           }:
           let
-            stdenv = pkgs.gcc13Stdenv;
+            stdenv = pkgs.gcc14Stdenv;
 
             clang-tools = pkgs.callPackage ./.nix-support/clang-tools.nix {
               inherit stdenv;
