@@ -1,0 +1,7 @@
+{% if targets | select("==", "exe") | list | count > 0 -%}
+{% if language == 'c' -%}
+main.c
+{%- else -%}
+main.cpp
+{%- endif %}
+{%- endif %}

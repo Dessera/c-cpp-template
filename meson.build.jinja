@@ -12,12 +12,70 @@ project(
   ],
 )
 
-incd = include_directories('include')
-src = files('src/{% include 'name-src.jinja' %}')
+{% if targets | select("==", "shared") | list | count > 0 or targets | select("==", "static") | list | count > 0 %}
+lib_src = files('src/{% include 'name-lib.jinja' %}')
+lib_inc = include_directories('include')
+
+install_subdir('include/{{ project_name }}', install_dir: 'include')
+{% endif %}
+
+{% if targets | select("==", "shared") | list | count > 0 %}
+shlib = shared_library(
+  '{{ project_name }}',
+  lib_src,
+  include_directories: lib_inc,
+  install: true,
+)
+dep_{{ project_name }}_shared = declare_dependency(include_directories: lib_inc, link_with: shlib)
+{% endif %}
+
+{% if targets | select("==", "static") | list | count > 0 %}
+stlib = static_library(
+  '{{ project_name }}',
+  lib_src,
+  include_directories: lib_inc,
+  install: true,
+)
+dep_{{ project_name }}_static = declare_dependency(include_directories: lib_inc, link_with: stlib)
+{% endif %}
+
+{% if targets | select("==", "exe") | list | count > 0 %}
+inc = include_directories('include')
+src = files('src/{% include 'name-exe.jinja' %}')
+deps = [
+  {% if targets | select("==", "shared") | list | count > 0 -%}
+  dep_{{ project_name }}_shared
+  {%- elif targets | select("==", "static") | list | count > 0 -%}
+  dep_{{ project_name }}_static
+  {%- endif %}
+]
 
 exe = executable(
   '{{ project_name }}',
   src,
-  include_directories: incd,
+  include_directories: inc,
+  dependencies: deps,
   install: true,
 )
+
+test('{{ project_name }}', exe)
+{% endif %}
+
+{% if use_pkg_config %}
+libs = [
+  {% if targets | select("==", "shared") | list | count > 0 -%}
+  shlib
+  {%- elif targets | select("==", "static") | list | count > 0 -%}
+  stlib
+  {%- endif %}
+]
+
+pkg_mod = import('pkgconfig')
+pkg_mod.generate(
+  name: '{{ project_name }}',
+  filebase: '{{ project_name }}',
+  description: '{{ description }}',
+  libraries: libs,
+  version: '{{ version }}',
+)
+{% endif %}

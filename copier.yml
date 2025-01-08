@@ -2,6 +2,11 @@ project_name:
   type: str
   help: "What is your project name:"
 
+description:
+  type: str
+  help: "What is the description of the project:"
+  default: ""
+
 version:
   type: str
   help: "What is the version of the project:"
@@ -181,9 +186,30 @@ c_std:
     {%- endif -%}
   when: "{{ language == 'c' }}"
 
+targets:
+  type: str
+  help: "What targets do you want to build for:"
+  choices:
+    - exe
+    - shared
+    - static
+  default: [ exe, shared ]
+  multiselect: true
+
+use_pkg_config:
+  type: bool
+  help: "Do you want to use pkg-config:"
+  default: |-
+    {% if targets | select('==', 'shared') | list | count > 0 or targets | select('==', 'static') | list | count > 0 -%}
+    true
+    {%- else -%}
+    false
+    {%- endif %}
+  when: "{{ targets | select('==', 'shared') | list | count > 0 or targets | select('==', 'static') | list | count > 0 }}"
+
 _exclude:
-  - name-src
+  - name-exe
   - name-header
-  - flake.lock
+  - name-lib
   - copier.yml
   - .git  # for local use only

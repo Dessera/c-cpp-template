@@ -5,7 +5,9 @@
   # Build tools
   meson,
   ninja,
+  {% if use_pkg_config -%}
   pkg-config,
+  {%- endif %}
 }:
 stdenv.mkDerivation {
   name = "{{ project_name }}";
@@ -14,6 +16,8 @@ stdenv.mkDerivation {
   nativeBuildInputs = [
     meson
     ninja
+    {% if use_pkg_config -%}
     pkg-config
+    {%- endif %}
   ];
 }
