@@ -1,12 +1,19 @@
 project(
   '{{ project_name }}',
-  'cpp',
+  '{{ language }}',
   version: '{{ version }}',
-  default_options: ['warning_level=3', 'cpp_std=gnu++26'],
+  default_options: [
+    'warning_level=3', 
+    {%if language == 'c' -%}
+    'c_std={{ c_std }}'
+    {%- else -%}
+    'cpp_std={{ cpp_std }}'
+    {%- endif %}
+  ],
 )
 
 incd = include_directories('include')
-src = files('src/main.cpp')
+src = files('src/{% include 'name-src.jinja' %}')
 
 exe = executable(
   '{{ project_name }}',

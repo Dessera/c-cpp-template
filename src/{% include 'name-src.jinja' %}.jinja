@@ -1,0 +1,18 @@
+{% if language == 'c' -%}
+#include <stdio.h>
+{%- else -%}
+#include <iostream>
+{%- endif %}
+
+
+int
+main()
+{
+  {% if language == 'c' -%}
+  printf("hello {{ project_name }}!\n");
+  {%- else -%}
+  std::cout << "hello {{ project_name }}!\n";
+  {%- endif %}
+
+  return 0;
+}

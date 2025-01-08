@@ -27,7 +27,15 @@
             ...
           }:
           let
-            stdenv = pkgs.gcc14Stdenv;
+            stdenv = {% if compiler == "gcc" -%}
+              pkgs.gcc{{ gcc_version }}Stdenv
+            {%- elif compiler == "clang" -%}
+              {% if use_libcxx -%}
+                pkgs.llvmPackages_{{ clang_version }}.libcxxStdenv
+              {%- else -%}
+                pkgs.clang{{ clang_version }}Stdenv
+              {%- endif %}
+            {%- endif %};
 
             clang-tools = pkgs.callPackage ./.nix-support/clang-tools.nix {
               inherit stdenv;

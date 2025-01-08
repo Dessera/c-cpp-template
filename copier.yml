@@ -1,7 +1,189 @@
 project_name:
   type: str
-  help: What is your project name?
+  help: "What is your project name:"
 
 version:
   type: str
-  help: What is the version of the project?
+  help: "What is the version of the project:"
+  default: "0.1.0"
+
+compiler:
+  type: str
+  help: "What compiler do you want to use (gcc or clang):"
+  choices:
+    - gcc
+    - clang
+  default: gcc
+
+gcc_version:
+  type: int
+  help: "What major version of gcc do you want to use:"
+  default: "14"
+  validator: >-
+    {% if gcc_version < 9 or gcc_version > 14 %}
+    GCC version must be between 9 and 14
+    {% endif %}
+  when: "{{ compiler == 'gcc' }}"
+
+clang_version:
+  type: int
+  help: "What major version of clang do you want to use:"
+  default: "19"
+  validator: >-
+    {% if clang_version < 12 or clang_version > 19 %}
+    Clang version must be between 12 and 19
+    {% endif %}
+  when: "{{ compiler == 'clang' }}"
+
+language:
+  type: str
+  help: "What language do you want to use:"
+  choices:
+    - c
+    - cpp
+  default: cpp
+
+use_libcxx:
+  type: bool
+  help: "Do you want to use libc++:"
+  default: |-
+    {% if compiler == 'clang' -%}
+    true
+    {%- else -%}
+    false
+    {%- endif %}
+  when: "{{ compiler == 'clang' and language == 'cpp' }}"
+
+cpp_std:
+  type: str
+  help: "What C++ standard do you want to use:"
+  choices:
+    "c++98":
+      value: "c++98"
+    "c++11":
+      value: "c++11"
+    "c++14":
+      value: "c++14"
+    "c++17":
+      value: "c++17"
+    "c++20":
+      value: "c++20"
+      validator: "{% if gcc_version < 10 %}GCC version must be at least 10 to use C++20{% endif %}"
+    "c++23":
+      value: "c++23"
+      validator: >-
+        {% if compiler == 'gcc' and gcc_version < 11 %}
+        GCC version must be at least 11 to use C++23
+        {% elif compiler == 'clang' and clang_version < 17 %}
+        Clang version must be at least 17 to use C++23
+        {% endif %}
+    "c++26":
+      value: "c++26"
+      validator: >-
+        {% if compiler == 'gcc' and gcc_version < 14 %}
+        GCC version must be at least 14 to use C++26
+        {% elif compiler == 'clang' and clang_version < 17 %}
+        Clang version must be at least 17 to use C++26
+        {% endif %}
+    "gnu++98":
+      value: "gnu++98"
+    "gnu++11":
+      value: "gnu++11"
+    "gnu++14":
+      value: "gnu++14"
+    "gnu++17":
+      value: "gnu++17"
+    "gnu++20":
+      value: "gnu++20"
+      validator: "{% if gcc_version < 10 %}GCC version must be at least 10 to use C++20{% endif %}"
+    "gnu++23":
+      value: "gnu++23"
+      validator: >-
+        {% if compiler == 'gcc' and gcc_version < 11 %}
+        GCC version must be at least 11 to use C++23
+        {% elif compiler == 'clang' and clang_version < 17 %}
+        Clang version must be at least 17 to use C++23
+        {% endif %}
+    "gnu++26":
+      value: "gnu++26"
+      validator: >-
+        {% if compiler == 'gcc' and gcc_version < 14 %}
+        GCC version must be at least 14 to use C++26
+        {% elif compiler == 'clang' and clang_version < 17 %}
+        Clang version must be at least 17 to use C++26
+        {% endif %}
+
+  default: |-
+    {% if compiler == 'gcc' -%}
+      {%- if gcc_version < 10 -%}
+        gnu++17
+      {%- elif gcc_version < 11 -%}
+        gnu++20
+      {%- elif gcc_version < 14 -%}
+        gnu++23
+      {%- else -%}
+        gnu++26
+      {%- endif -%}
+    {%- else -%}
+      {%- if clang_version < 17 -%}
+        gnu++17
+      {%- else -%}
+        gnu++26
+      {%- endif -%}
+    {%- endif -%}
+  when: "{{ language == 'cpp' }}"
+
+c_std:
+  type: str
+  help: "What C standard do you want to use:"
+  choices:
+    "c99":
+      value: "c99"
+    "c11":
+      value: "c11"
+    "c17":
+      value: "c17"
+    "c23":
+      value: "c23"
+      validator: >-
+        {% if compiler == 'gcc' and gcc_version < 14 %}
+        GCC version must be at least 14 to use C23
+        {% elif compiler == 'clang' and clang_version < 18 %}
+        Clang version must be at least 18 to use C23
+        {% endif %}
+    "gnu99":
+      value: "gnu99"
+    "gnu11":
+      value: "gnu11"
+    "gnu17":
+      value: "gnu17"
+    "gnu23":
+      value: "gnu23"
+      validator: >-
+        {% if compiler == 'gcc' and gcc_version < 14 %}
+        GCC version must be at least 14 to use C23
+        {% elif compiler == 'clang' and clang_version < 18 %}
+        Clang version must be at least 18 to use C23
+        {% endif %}
+  default: |-
+    {% if compiler == 'gcc' -%}
+      {%- if gcc_version < 14 -%}
+        gnu17
+      {%- else -%}
+        gnu23
+      {%- endif -%}
+    {%- else -%}
+      {%- if clang_version < 18 -%}
+        gnu17
+      {%- else -%}
+        gnu23
+      {%- endif -%}
+    {%- endif -%}
+  when: "{{ language == 'c' }}"
+
+_exclude:
+  - name-src
+  - name-header
+  - flake.lock
+  - copier.yml
+  - .git  # for local use only
