@@ -212,4 +212,5 @@ _exclude:
   - name-header
   - name-lib
   - copier.yml
+  - README.md
   - .git  # for local use only
