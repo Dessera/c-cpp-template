@@ -1,7 +1,9 @@
-{% if targets | select("==", "shared") | list | count > 0 or targets | select("==", "static") | list | count > 0 -%}
-{% if language == 'c' -%}
+{%- import '.jinja/targets.jinja' as tg with context -%}
+
+{%- if tg.has_lib -%}
+{%- if language == 'c' -%}
 {{ project_name }}.c
 {%- else -%}
 {{ project_name }}.cpp
-{%- endif %}
-{%- endif %}
+{%- endif -%}
+{%- endif -%}

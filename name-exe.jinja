@@ -1,7 +1,9 @@
-{% if targets | select("==", "exe") | list | count > 0 -%}
-{% if language == 'c' -%}
+{%- import '.jinja/targets.jinja' as tg with context -%}
+
+{%- if tg.has_exe -%}
+{%- if language == 'c' -%}
 main.c
 {%- else -%}
 main.cpp
-{%- endif %}
-{%- endif %}
+{%- endif -%}
+{%- endif -%}
