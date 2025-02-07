@@ -5,7 +5,6 @@ project_name:
 description:
   type: str
   help: "What is the description of the project:"
-  default: ""
 
 version:
   type: str
@@ -199,13 +198,7 @@ targets:
 use_pkg_config:
   type: bool
   help: "Do you want to use pkg-config:"
-  default: |-
-    {% if targets | select('==', 'shared') | list | count > 0 or targets | select('==', 'static') | list | count > 0 -%}
-    true
-    {%- else -%}
-    false
-    {%- endif %}
-  when: "{{ targets | select('==', 'shared') | list | count > 0 or targets | select('==', 'static') | list | count > 0 }}"
+  default: true
 
 _exclude:
   - name-exe
@@ -213,4 +206,5 @@ _exclude:
   - name-lib
   - copier.yml
   - README.md
+  - .jinja
   - .git  # for local use only

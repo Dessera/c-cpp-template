@@ -1,0 +1,4 @@
+{% set has_shared = 'shared' in targets %}
+{% set has_static = 'static' in targets %}
+{% set has_exe = 'exe' in targets %}
+{% set has_lib = has_shared or has_static %}

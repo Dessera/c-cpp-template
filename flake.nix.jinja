@@ -41,7 +41,7 @@
               inherit stdenv;
             };
 
-            codium = withSystem system ({ inputs', ... }: inputs'.nixcode.packages.c_cpp);
+            code = withSystem system ({ inputs', ... }: inputs'.nixcode.packages.nixcode-cpp);
           in
           {
             packages.default = pkgs.callPackage ./default.nix { inherit stdenv; };
@@ -61,7 +61,7 @@
                     ])
                     ++ [
                       clang-tools
-                      codium
+                      code
                     ];
                 };
           };

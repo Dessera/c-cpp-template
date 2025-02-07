@@ -1,25 +1,26 @@
+{% import '.jinja/targets.jinja' as tg with context -%}
+
 project(
   '{{ project_name }}',
   '{{ language }}',
   version: '{{ version }}',
-  default_options: [
-    'warning_level=3', 
-    {%if language == 'c' -%}
+  default_options: ['warning_level=3', 
+    {%- if language == 'c' -%}
     'c_std={{ c_std }}'
     {%- else -%}
     'cpp_std={{ cpp_std }}'
-    {%- endif %}
+    {%- endif -%}
   ],
 )
 
-{% if targets | select("==", "shared") | list | count > 0 or targets | select("==", "static") | list | count > 0 %}
+{% if tg.has_shared or tg.has_static -%}
 lib_src = files('src/{% include 'name-lib.jinja' %}')
 lib_inc = include_directories('include')
 
 install_subdir('include/{{ project_name }}', install_dir: 'include')
-{% endif %}
+{%- endif %}
 
-{% if targets | select("==", "shared") | list | count > 0 %}
+{% if tg.has_shared -%}
 shlib = shared_library(
   '{{ project_name }}',
   lib_src,
@@ -27,9 +28,9 @@ shlib = shared_library(
   install: true,
 )
 dep_{{ project_name }}_shared = declare_dependency(include_directories: lib_inc, link_with: shlib)
-{% endif %}
+{%- endif %}
 
-{% if targets | select("==", "static") | list | count > 0 %}
+{% if tg.has_static -%}
 stlib = static_library(
   '{{ project_name }}',
   lib_src,
@@ -37,17 +38,17 @@ stlib = static_library(
   install: true,
 )
 dep_{{ project_name }}_static = declare_dependency(include_directories: lib_inc, link_with: stlib)
-{% endif %}
+{%- endif %}
 
-{% if targets | select("==", "exe") | list | count > 0 %}
+{% if tg.has_exe -%}
 inc = include_directories('include')
 src = files('src/{% include 'name-exe.jinja' %}')
 deps = [
-  {% if targets | select("==", "shared") | list | count > 0 -%}
+  {%- if tg.has_shared -%}
   dep_{{ project_name }}_shared
-  {%- elif targets | select("==", "static") | list | count > 0 -%}
+  {%- elif tg.has_static -%}
   dep_{{ project_name }}_static
-  {%- endif %}
+  {%- endif -%}
 ]
 
 exe = executable(
@@ -59,15 +60,15 @@ exe = executable(
 )
 
 test('{{ project_name }}', exe)
-{% endif %}
+{%- endif %}
 
-{% if use_pkg_config %}
+{% if use_pkg_config and tg.has_lib -%}
 libs = [
-  {% if targets | select("==", "shared") | list | count > 0 -%}
+  {%- if tg.has_shared -%}
   shlib
-  {%- elif targets | select("==", "static") | list | count > 0 -%}
+  {%- elif tg.has_static -%}
   stlib
-  {%- endif %}
+  {%- endif -%}
 ]
 
 pkg_mod = import('pkgconfig')
@@ -78,4 +79,4 @@ pkg_mod.generate(
   libraries: libs,
   version: '{{ version }}',
 )
-{% endif %}
+{%- endif %}
